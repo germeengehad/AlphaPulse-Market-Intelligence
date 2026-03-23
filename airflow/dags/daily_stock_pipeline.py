@@ -50,3 +50,4 @@ def daily_stock_pipeline():
 
 
 dag = daily_stock_pipeline()
+

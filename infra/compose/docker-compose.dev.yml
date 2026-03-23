@@ -61,6 +61,27 @@ services:
     command: >
       bash -c "airflow scheduler"
 
+  streamlit:
+    build:
+      context: ../docker
+      dockerfile: streamlit.Dockerfile
+    container_name: streamlit_app
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../../:/app
+    environment:
+      PYTHONPATH: /app
+      DB_USER: stock_user
+      DB_PASSWORD: stock_pass
+      DB_HOST: stock_db
+      DB_PORT: 5432
+      DB_NAME: stock_db
+    depends_on:
+      - stock_db
+ 
 volumes:
   postgres-db:
   stock_pgdata:
+
+  
