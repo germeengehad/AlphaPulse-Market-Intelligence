@@ -1,3 +1,30 @@
+# 🚀 AlphaPulse: AI Trading & Market Analytics System
+
+## 📊 System Architecture
+
+       ┌───────────────────────┐
+       │    Yahoo Finance      │
+       │     Market Data       │
+       └──────────┬────────────┘
+                  │
+                  ▼
+       ┌───────────────────────┐
+       │       Airflow         │
+       │   ETL & Scheduler     │
+       └──────────┬────────────┘
+                  │
+                  ▼
+       ┌───────────────────────┐
+       │       Postgres        │
+       │   Historical Storage  │
+       └──────────┬────────────┘
+                  │
+                  ▼
+       ┌───────────────────────┐
+       │       Streamlit       │
+       │ Dashboard + AI Layer  │
+       └───────────────────────┘
+
 Trading System & Market Analytics Platform
 
 This project is an end-to-end market analytics and trading system that fetches live financial data, processes it, stores it for historical analysis, and generates actionable insights using AI. It demonstrates data engineering, ML, and visualization skills in a real-world trading scenario.
