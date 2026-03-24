@@ -30,6 +30,8 @@ Interactive dashboard provides professional presentation for recruiters and stak
 Real-time, multi-symbol, multi-timeframe analysis demonstrates trading analytics expertise.
 
 Live Demo:
+Hosted on Streamlit Cloud reading live data from Postgres.
+Users can explore AI predictions, historical performance, and multi-timeframe trends interactively.
 
 Hosted on Streamlit Cloud (or another free platform) reading live data from Postgres.
 Users can explore AI predictions, historical performance, and multi-timeframe trends interactively.# AlphaPulse
