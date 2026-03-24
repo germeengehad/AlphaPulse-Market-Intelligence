@@ -24,8 +24,9 @@
        │       Streamlit       │
        │ Dashboard + AI Layer  │
        └───────────────────────┘
+## 🧠 Overview
 
-Trading System & Market Analytics Platform
+**AlphaPulse** is an **end-to-end AI-powered trading and market analytics system** designed
 
 This project is an end-to-end market analytics and trading system that fetches live financial data, processes it, stores it for historical analysis, and generates actionable insights using AI. It demonstrates data engineering, ML, and visualization skills in a real-world trading scenario.
 
