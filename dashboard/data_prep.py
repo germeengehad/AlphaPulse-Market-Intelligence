@@ -1,145 +1,3 @@
-# import pandas as pd
-# from database.connection import get_engine
-
-# # =========================
-# # CONFIG
-# # =========================
-# TABLES = ["market_1d", "market_1h", "market_15m"]
-
-# # Rolling window constants
-# ROLLING_1D = 7
-# ROLLING_30D = 30
-# ROLLING_1H = 24
-# ROLLING_15M = 16
-
-# # =========================
-# # DATA LOADING & CLEANING
-# # =========================
-# def load_and_clean_table(table_name: str, engine) -> pd.DataFrame:
-#     """
-#     Load and clean market data from the database.
-    
-#     Parameters
-#     ----------
-#     table_name : str
-#         Name of the database table.
-#     engine : sqlalchemy.Engine
-#         SQLAlchemy engine to connect to the database.
-        
-#     Returns
-#     -------
-#     pd.DataFrame
-#         Cleaned dataframe with no missing OHLCV values and timestamps parsed.
-#     """
-#     try:
-#         df: pd.DataFrame = pd.read_sql(f"SELECT * FROM {table_name}", engine)
-#     except Exception as e:
-#         raise RuntimeError(f"Error loading table {table_name}: {e}")
-
-#     # Convert timestamp
-#     df['ts'] = pd.to_datetime(df['ts'])
-
-#     # Drop adj_close if exists
-#     if 'adj_close' in df.columns:
-#         df = df.drop(columns=['adj_close'])
-
-#     # Sort by symbol and timestamp
-#     df = df.sort_values(['symbol', 'ts'])
-
-#     # Drop missing OHLCV rows
-#     df = df.dropna(subset=['open', 'high', 'low', 'close', 'volume'])
-
-#     return df.reset_index(drop=True)
-
-
-# # =========================
-# # FEATURE ENGINEERING
-# # =========================
-# def feature_engineering_1d(df: pd.DataFrame) -> pd.DataFrame:
-#     """
-#     Generate daily features including returns, moving averages, volatility, trend, and market regime.
-#     """
-#     df = df.copy().sort_values(['symbol', 'ts'])
-
-#     df['daily_return'] = df.groupby('symbol')['close'].pct_change()
-#     df['MA_7'] = df.groupby('symbol')['close'].transform(lambda x: x.rolling(ROLLING_1D).mean())
-#     df['MA_30'] = df.groupby('symbol')['close'].transform(lambda x: x.rolling(ROLLING_30D).mean())
-#     df['daily_volatility'] = df.groupby('symbol')['daily_return'].transform(lambda x: x.rolling(ROLLING_1D).std())
-#     df['trend'] = (df['MA_7'] > df['MA_30']).astype(int)
-
-#     # Market regime
-#     df['regime'] = "sideways"
-#     df.loc[df['MA_7'] > df['MA_30'], 'regime'] = "bull"
-#     df.loc[df['MA_7'] < df['MA_30'], 'regime'] = "bear"
-
-#     return df
-
-
-# def feature_engineering_1h(df: pd.DataFrame) -> pd.DataFrame:
-#     """
-#     Generate hourly features including returns, rolling mean, volatility, and trend.
-#     """
-#     df = df.copy().sort_values(['symbol', 'ts'])
-
-#     df['hourly_return'] = df.groupby('symbol')['close'].pct_change()
-#     df['hourly_mean'] = df.groupby('symbol')['close'].transform(lambda x: x.rolling(ROLLING_1H).mean())
-#     df['hourly_volatility'] = df.groupby('symbol')['hourly_return'].transform(lambda x: x.rolling(ROLLING_1H).std())
-#     df['hourly_trend'] = (df['hourly_return'] > 0).astype(int)
-
-#     return df
-
-
-# def feature_engineering_15m(df: pd.DataFrame) -> pd.DataFrame:
-#     """
-#     Generate 15-minute features including returns, rolling mean, volatility, and trend.
-#     """
-#     df = df.copy().sort_values(['symbol', 'ts'])
-
-#     df['min15_return'] = df.groupby('symbol')['close'].pct_change()
-#     df['min15_mean'] = df.groupby('symbol')['close'].transform(lambda x: x.rolling(ROLLING_15M).mean())
-#     df['min15_volatility'] = df.groupby('symbol')['min15_return'].transform(lambda x: x.rolling(ROLLING_15M).std())
-#     df['min15_trend'] = (df['min15_return'] > 0).astype(int)
-
-#     return df
-
-
-# # =========================
-# # MAIN PIPELINE FUNCTION
-# # =========================
-# def load_and_process_all():
-#     """
-#     Load, clean, and process all market data tables with feature engineering.
-
-#     Returns
-#     -------
-#     tuple of pd.DataFrame
-#         (df_1d, df_1h, df_15m)
-#     """
-#     engine = get_engine()
-
-#     # Load & clean all tables
-#     cleaned_tables = {table: load_and_clean_table(table, engine) for table in TABLES}
-
-#     # Apply feature engineering
-#     df_1d = feature_engineering_1d(cleaned_tables['market_1d'])
-#     df_1h = feature_engineering_1h(cleaned_tables['market_1h'])
-#     df_15m = feature_engineering_15m(cleaned_tables['market_15m'])
-
-#     return df_1d, df_1h, df_15m
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import pandas as pd
 from database.connection import get_engine
 
@@ -235,45 +93,58 @@ def feature_engineering_15m(df: pd.DataFrame) -> pd.DataFrame:
 # =========================
 def build_multi_timeframe_dataset(df_1d, df_1h, df_15m):
     """
-    Align multi-timeframe data using asof merge.
+    Align multi-timeframe data using asof merge (per symbol).
     """
 
-    # ⚡ تأكد من ترتيب الـ timestamps
-    df_1d = df_1d.sort_values(['symbol', 'ts']).reset_index(drop=True)
-    df_1h = df_1h.sort_values(['symbol', 'ts']).reset_index(drop=True)
-    df_15m = df_15m.sort_values(['symbol', 'ts']).reset_index(drop=True)
+    merged_list = []
 
-    # Merge 1H into 1D
-    df = pd.merge_asof(
-        df_1d,
-        df_1h[['symbol', 'ts', 'hourly_return', 'hourly_volatility']],
-        on='ts',
-        by='symbol',
-        direction='backward'
-    )
+    symbols = df_1d['symbol'].unique()
 
-    # Merge 15m into result
-    df = pd.merge_asof(
-        df,
-        df_15m[['symbol', 'ts', 'min15_return', 'min15_volatility']],
-        on='ts',
-        by='symbol',
-        direction='backward'
-    )
+    for symbol in symbols:
 
-    return df
+        df1 = df_1d[df_1d['symbol'] == symbol].sort_values('ts').reset_index(drop=True)
+        df2 = df_1h[df_1h['symbol'] == symbol].sort_values('ts').reset_index(drop=True)
+        df3 = df_15m[df_15m['symbol'] == symbol].sort_values('ts').reset_index(drop=True)
 
+        # ✅ Ensure timestamps are sorted for asof merge
+        assert df1['ts'].is_monotonic_increasing
+        assert df2['ts'].is_monotonic_increasing
+        assert df3['ts'].is_monotonic_increasing
+
+        # Merge 1H
+        df = pd.merge_asof(
+            df1,
+            df2[['ts', 'hourly_return', 'hourly_volatility']],
+            on='ts',
+            direction='backward'
+        )
+
+        # Merge 15m
+        df = pd.merge_asof(
+            df,
+            df3[['ts', 'min15_return', 'min15_volatility']],
+            on='ts',
+            direction='backward'
+        )
+
+        df['symbol'] = symbol
+        merged_list.append(df)
+
+    df_all = pd.concat(merged_list).reset_index(drop=True)
+    df_all = df_all.dropna()
+
+    return df_all
 # =========================
 # TARGET
 # =========================
-def add_target(df):
-    df = df.copy()
+def add_target(df_all):
+    df_all = df_all.copy()
 
-    df['target'] = (
-        df.groupby('symbol')['close'].shift(-1) > df['close']
+    df_all['target'] = (
+        df_all.groupby('symbol')['close'].shift(-1) > df_all['close']
     ).astype(int)
 
-    return df
+    return df_all
 
 # =========================
 # MAIN PIPELINE
