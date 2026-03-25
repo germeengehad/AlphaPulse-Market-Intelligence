@@ -188,16 +188,23 @@ ROLLING_30D = 30
 ROLLING_1H = 24
 ROLLING_15M = 16
 
-DATA_DIR = r"C:\germeen\AlphaPulse\dashboard\data"
+# =========================
+# DATA DIR (relative to this file)
+# =========================
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+print("Loading CSVs from:", DATA_DIR)
 
 # =========================
 # DATA LOADING & CLEANING
 # =========================
 def load_csv_table(filename: str) -> pd.DataFrame:
     path = os.path.join(DATA_DIR, filename)
+    print("Trying to load:", path)
     if not os.path.exists(path):
-        raise FileNotFoundError(f"{path} does not exist!")
-    df = pd.read_csv(path, parse_dates=['ts'], error_bad_lines=False)
+        raise FileNotFoundError(
+            f"{path} does not exist!\nMake sure the CSV file is inside the 'data' folder."
+        )
+    df = pd.read_csv(path, parse_dates=['ts'])
     df = df.sort_values(['symbol', 'ts']).reset_index(drop=True)
     df = df.dropna(subset=['open', 'high', 'low', 'close', 'volume'])
     if 'adj_close' in df.columns:
