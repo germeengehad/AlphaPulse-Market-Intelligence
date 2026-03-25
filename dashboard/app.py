@@ -599,11 +599,18 @@ def styled_chart(fig, title=""):
     return fig
 
 
+def hex_to_rgba(hex_color, alpha=0.08):
+    """Convert a hex color string to rgba(...) with the given alpha."""
+    h = hex_color.lstrip('#')
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
 def plot_sparkline(series, color="#00d4aa"):
+    fillcolor = hex_to_rgba(color, 0.08) if color.startswith('#') else color
     fig = go.Figure(go.Scatter(y=series.values, mode='lines',
                                line=dict(color=color, width=2),
                                fill='tozeroy',
-                               fillcolor=color.replace(')', ',0.08)').replace('rgb', 'rgba') if 'rgb' in color else color + '14'))
+                               fillcolor=fillcolor))
     fig.update_layout(
         height=80,
         paper_bgcolor='rgba(0,0,0,0)',
