@@ -151,7 +151,7 @@ Due to limited dataset size, the model shows:
 
 ## 👨‍💻 Author
 
-**Germeen Elmghlawy**  
+**Germeen Gehad**  
 Data Science & Machine Learning Enthusiast  
 
 ---
