@@ -2,13 +2,8 @@
 
 > End-to-end trading analytics platform combining **data engineering, machine learning, and interactive visualization** to generate actionable market insights.
 
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-
-![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
-
-![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
-
-![Airflow](https://img.shields.io/badge/Airflow-ETL-orange)
+![Python](https://img.shields.io/badge/Python-3.10-blue) ![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue) ![Airflow](https://img.shields.io/badge/Airflow-ETL-orange)
 
 ---
 
@@ -125,7 +120,7 @@ Due to limited dataset size, the model shows:
 
 ## 🌐 Live Demo
 
-👉 [Open Dashboard]([YOUR_STREAMLIT_LINK_HERE](https://alphapulse-market-intelligence-n8gya9pdwmar6ad8gf4rxr.streamlit.app/))
+👉 [Open Dashboard](https://alphapulse-market-intelligence-n8gya9pdwmar6ad8gf4rxr.streamlit.app/)
 
 ---
 
