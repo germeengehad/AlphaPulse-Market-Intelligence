@@ -146,31 +146,70 @@ def add_target(df_all):
 
     return df_all
 
-# =========================
-# MAIN PIPELINE
-# =========================
+# # =========================
+# # MAIN PIPELINE
+# # =========================
+# def load_and_process_all():
+
+#     engine = get_engine()
+
+#     # Load
+#     cleaned_tables = {
+#         table: load_and_clean_table(table, engine)
+#         for table in TABLES
+#     }
+
+#     # Feature engineering
+#     df_1d = feature_engineering_1d(cleaned_tables['market_1d'])
+#     df_1h = feature_engineering_1h(cleaned_tables['market_1h'])
+#     df_15m = feature_engineering_15m(cleaned_tables['market_15m'])
+
+#     # 🔥 Merge timeframes
+#     df_all = build_multi_timeframe_dataset(df_1d, df_1h, df_15m)
+
+#     # 🔥 Add target
+#     df_all = add_target(df_all)
+
+#     # 🔥 Drop NaN before modeling
+#     df_all = df_all.dropna()
+
+#     return df_all, df_1d, df_1h, df_15m
+
 def load_and_process_all():
+    # =========================
+    # Load from CSV (DEPLOY MODE)
+    # =========================
+    df_1d = pd.read_csv("data/market_1d.csv", parse_dates=['ts'])
+    df_1h = pd.read_csv("data/market_1h.csv", parse_dates=['ts'])
+    df_15m = pd.read_csv("data/market_15m.csv", parse_dates=['ts'])
 
-    engine = get_engine()
+    # =========================
+    # Sort (VERY IMPORTANT for merge_asof)
+    # =========================
+    df_1d = df_1d.sort_values(['symbol', 'ts']).reset_index(drop=True)
+    df_1h = df_1h.sort_values(['symbol', 'ts']).reset_index(drop=True)
+    df_15m = df_15m.sort_values(['symbol', 'ts']).reset_index(drop=True)
 
-    # Load
-    cleaned_tables = {
-        table: load_and_clean_table(table, engine)
-        for table in TABLES
-    }
-
+    # =========================
     # Feature engineering
-    df_1d = feature_engineering_1d(cleaned_tables['market_1d'])
-    df_1h = feature_engineering_1h(cleaned_tables['market_1h'])
-    df_15m = feature_engineering_15m(cleaned_tables['market_15m'])
+    # =========================
+    df_1d = feature_engineering_1d(df_1d)
+    df_1h = feature_engineering_1h(df_1h)
+    df_15m = feature_engineering_15m(df_15m)
 
-    # 🔥 Merge timeframes
+    # =========================
+    # Merge timeframes
+    # =========================
     df_all = build_multi_timeframe_dataset(df_1d, df_1h, df_15m)
 
-    # 🔥 Add target
+    # =========================
+    # Add target
+    # =========================
     df_all = add_target(df_all)
 
-    # 🔥 Drop NaN before modeling
-    df_all = df_all.dropna()
+    # =========================
+    # Drop NaN (for ML)
+    # =========================
+    df_all = df_all.dropna().reset_index(drop=True)
 
     return df_all, df_1d, df_1h, df_15m
