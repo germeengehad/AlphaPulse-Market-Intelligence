@@ -1,9 +1,0 @@
-pandas
-numpy
-streamlit
-plotly
-sqlalchemy
-psycopg2-binary
-python-dotenv
-streamlit-autorefresh
-scikit-learn
