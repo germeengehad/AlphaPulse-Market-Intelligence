@@ -188,7 +188,7 @@ ROLLING_30D = 30
 ROLLING_1H = 24
 ROLLING_15M = 16
 
-DATA_DIR = "data"
+DATA_DIR = r"C:\germeen\AlphaPulse\dashboard\data"
 
 # =========================
 # DATA LOADING & CLEANING
